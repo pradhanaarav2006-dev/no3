@@ -7,7 +7,10 @@ const Storage = {
     saveStudyLogs: (logs) => localStorage.setItem('studytrack_logs', JSON.stringify(logs)),
 
     getTheme: () => localStorage.getItem('studytrack_theme') || 'dark',
-    saveTheme: (theme) => localStorage.setItem('studytrack_theme', theme)
+    saveTheme: (theme) => localStorage.setItem('studytrack_theme', theme),
+
+    getEvents: () => JSON.parse(localStorage.getItem('studytrack_events')) || {},
+    saveEvents: (events) => localStorage.setItem('studytrack_events', JSON.stringify(events))
 };
 
 // ===== DOM Elements =====
@@ -81,6 +84,12 @@ function getToday() {
     return new Date().toISOString().split('T')[0];
 }
 
+function isOverdue(dateStr) {
+    if (!dateStr) return false;
+    const today = getToday();
+    return dateStr < today;
+}
+
 function getDayName(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -92,6 +101,80 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         DOM.toast.classList.remove('show');
     }, 3000);
+}
+
+// ===== Calendar Integration =====
+function addGoalToCalendar(goal) {
+    const events = Storage.getEvents();
+    const dateStr = goal.deadline;
+
+    if (!events[dateStr]) events[dateStr] = [];
+
+    // Add goal as calendar event
+    events[dateStr].push({
+        title: `🎯 Goal: ${goal.title}`,
+        time: '',
+        color: goal.priority === 'high' ? 'red' : goal.priority === 'medium' ? 'orange' : 'green',
+        goalId: goal.id,
+        completed: false
+    });
+
+    Storage.saveEvents(events);
+}
+
+function updateGoalInCalendar(goalId, completed, completedLate = false) {
+    const events = Storage.getEvents();
+    let updated = false;
+
+    // Find and update the goal event in calendar
+    for (const dateStr in events) {
+        events[dateStr].forEach(event => {
+            if (event.goalId === goalId) {
+                event.completed = completed;
+                event.completedLate = completedLate;
+                if (completed) {
+                    if (completedLate) {
+                        event.title = event.title.replace('🎯 Goal:', '⏰ Goal:');
+                        event.title = event.title.replace('✅ Goal:', '⏰ Goal:');
+                    } else {
+                        event.title = event.title.replace('🎯 Goal:', '✅ Goal:');
+                    }
+                } else {
+                    event.title = event.title.replace('✅ Goal:', '🎯 Goal:');
+                    event.title = event.title.replace('⏰ Goal:', '🎯 Goal:');
+                }
+                updated = true;
+            }
+        });
+    }
+
+    if (updated) {
+        Storage.saveEvents(events);
+    }
+}
+
+function deleteGoalFromCalendar(goalId) {
+    const events = Storage.getEvents();
+    let updated = false;
+
+    // Find and delete the goal event from calendar
+    for (const dateStr in events) {
+        const originalLength = events[dateStr].length;
+        events[dateStr] = events[dateStr].filter(event => event.goalId !== goalId);
+
+        if (events[dateStr].length !== originalLength) {
+            updated = true;
+        }
+
+        // Clean up empty dates
+        if (events[dateStr].length === 0) {
+            delete events[dateStr];
+        }
+    }
+
+    if (updated) {
+        Storage.saveEvents(events);
+    }
 }
 
 // ===== Theme Functions =====
@@ -124,8 +207,12 @@ function renderGoals() {
         DOM.goalsList.appendChild(DOM.emptyGoals);
     } else {
         DOM.emptyGoals.style.display = 'none';
-        DOM.goalsList.innerHTML = goals.map(goal => `
-            <div class="goal-item ${goal.completed ? 'completed' : ''}" data-id="${goal.id}">
+        const today = getToday();
+        DOM.goalsList.innerHTML = goals.map(goal => {
+            const overdue = !goal.completed && goal.deadline && goal.deadline < today;
+            const completedLate = goal.completed && goal.completedLate;
+            return `
+            <div class="goal-item ${goal.completed ? 'completed' : ''} ${overdue ? 'overdue' : ''} ${completedLate ? 'completed-late' : ''}" data-id="${goal.id}">
                 <div class="goal-header">
                     <div class="goal-title-wrapper">
                         <div class="goal-checkbox ${goal.completed ? 'checked' : ''}" onclick="toggleGoal('${goal.id}')"></div>
@@ -139,10 +226,11 @@ function renderGoals() {
                 ${goal.description ? `<p class="goal-description">${escapeHtml(goal.description)}</p>` : ''}
                 <div class="goal-meta">
                     <span class="goal-badge badge-${goal.priority}">${goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)}</span>
-                    ${goal.deadline ? `<span class="goal-badge badge-date">📅 ${formatDate(goal.deadline)}</span>` : ''}
+                    ${goal.deadline ? `<span class="goal-badge ${overdue ? 'badge-overdue' : 'badge-date'}">📅 ${formatDate(goal.deadline)}${overdue ? ' (Overdue!)' : ''}</span>` : ''}
+                    ${completedLate ? '<span class="goal-badge badge-late">⏰ Late Submission</span>' : ''}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     updateStats();
@@ -175,6 +263,11 @@ function addGoal() {
     goals.unshift(goal);
     Storage.saveGoals(goals);
 
+    // Add to calendar if deadline is set
+    if (goal.deadline) {
+        addGoalToCalendar(goal);
+    }
+
     // Reset form
     DOM.goalTitle.value = '';
     DOM.goalDescription.value = '';
@@ -191,9 +284,27 @@ function toggleGoal(id) {
     const goal = goals.find(g => g.id === id);
     if (goal) {
         goal.completed = !goal.completed;
+
+        // Check if completing late (after deadline)
+        if (goal.completed && goal.deadline) {
+            const today = getToday();
+            if (goal.deadline < today) {
+                goal.completedLate = true;
+            }
+        }
+
+        // If unmarking complete, remove late flag
+        if (!goal.completed) {
+            goal.completedLate = false;
+        }
+
         Storage.saveGoals(goals);
+
+        // Sync with calendar
+        updateGoalInCalendar(id, goal.completed, goal.completedLate);
+
         renderGoals();
-        showToast(goal.completed ? 'Goal completed! 🎉' : 'Goal marked as incomplete');
+        showToast(goal.completed ? (goal.completedLate ? 'Goal completed (Late)! 📋' : 'Goal completed! 🎉') : 'Goal marked as incomplete');
     }
 }
 
@@ -202,6 +313,10 @@ function deleteGoal(id) {
 
     const goals = Storage.getGoals().filter(g => g.id !== id);
     Storage.saveGoals(goals);
+
+    // Delete from calendar too
+    deleteGoalFromCalendar(id);
+
     renderGoals();
     showToast('Goal deleted');
 }

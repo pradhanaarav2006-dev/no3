@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer - StudyTrack</title>
+    <meta name="description" content="Focus better with the Pomodoro technique">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">📚</span>
+                <h1>StudyTrack</h1>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                <span class="theme-icon" id="themeIcon">🌙</span>
+            </button>
+        </div>
+        <p class="tagline">Track Your Progress, Achieve Your Goals</p>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <a href="index.html" class="nav-tab" title="Home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="pomodoro.html" class="nav-tab active" title="Pomodoro Timer">
+                <span class="nav-icon">⏰</span>
+                <span class="nav-label">Pomodoro</span>
+            </a>
+            <a href="calendar.html" class="nav-tab" title="Calendar">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Calendar</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- Pomodoro Timer Section -->
+        <section class="pomodoro-section">
+            <div class="timer-card">
+                <div class="timer-modes">
+                    <button class="mode-btn active" data-mode="work" data-time="25">Focus</button>
+                    <button class="mode-btn" data-mode="short" data-time="5">Short Break</button>
+                    <button class="mode-btn" data-mode="long" data-time="15">Long Break</button>
+                </div>
+
+                <div class="timer-display">
+                    <span class="timer-time" id="timerDisplay">25:00</span>
+                    <div class="timer-progress">
+                        <svg class="progress-ring" width="280" height="280">
+                            <circle class="progress-ring-bg" cx="140" cy="140" r="130" />
+                            <circle class="progress-ring-fill" id="progressRing" cx="140" cy="140" r="130" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button class="btn btn-primary btn-large" id="startBtn">
+                        <span id="startBtnText">Start</span>
+                    </button>
+                    <button class="btn btn-secondary btn-large" id="resetBtn">Reset</button>
+                </div>
+
+                <div class="session-info">
+                    <div class="session-stat">
+                        <span class="session-value" id="sessionsCompleted">0</span>
+                        <span class="session-label">Sessions Today</span>
+                    </div>
+                    <div class="session-stat">
+                        <span class="session-value" id="totalFocusTime">0</span>
+                        <span class="session-label">Minutes Focused</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips Section -->
+            <div class="tips-card">
+                <h3>💡 Pomodoro Technique</h3>
+                <ul class="tips-list">
+                    <li>Work for 25 minutes with full focus</li>
+                    <li>Take a 5-minute short break</li>
+                    <li>After 4 sessions, take a 15-minute long break</li>
+                    <li>Stay hydrated and stretch during breaks!</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="pomodoro.js"></script>
+</body>
+
+</html>
