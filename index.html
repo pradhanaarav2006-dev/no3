@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyTrack - Student Progress Tracker</title>
+    <meta name="description" content="Track your study goals and daily study hours to maximize your academic progress">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">📚</span>
+            <h1>StudyTrack</h1>
+        </div>
+        <p class="tagline">Track Your Progress, Achieve Your Goals</p>
+    </header>
+
+    <main class="container">
+        <!-- Stats Dashboard -->
+        <section class="dashboard">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="totalGoals">0</span>
+                    <span class="stat-label">Total Goals</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="completedGoals">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="todayHours">0</span>
+                    <span class="stat-label">Hours Today</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="weeklyHours">0</span>
+                    <span class="stat-label">This Week</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Goals Section -->
+            <section class="goals-section">
+                <div class="section-header">
+                    <h2>🎯 My Goals</h2>
+                    <button class="btn btn-primary" id="addGoalBtn">
+                        <span>+</span> Add Goal
+                    </button>
+                </div>
+
+                <!-- Add Goal Form (Hidden by default) -->
+                <div class="goal-form" id="goalForm" style="display: none;">
+                    <input type="text" id="goalTitle" placeholder="Goal title..." class="input" required>
+                    <textarea id="goalDescription" placeholder="Description (optional)" class="input textarea"></textarea>
+                    <div class="form-row">
+                        <select id="goalPriority" class="input select">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                        <input type="date" id="goalDeadline" class="input">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" id="cancelGoalBtn">Cancel</button>
+                        <button class="btn btn-primary" id="saveGoalBtn">Save Goal</button>
+                    </div>
+                </div>
+
+                <!-- Goals List -->
+                <div class="goals-list" id="goalsList">
+                    <div class="empty-state" id="emptyGoals">
+                        <span class="empty-icon">🎯</span>
+                        <p>No goals yet. Start by adding one!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Study Hours Section -->
+            <section class="study-section">
+                <div class="section-header">
+                    <h2>⏱️ Study Hours</h2>
+                </div>
+
+                <!-- Add Study Hours Form -->
+                <div class="study-form">
+                    <div class="form-row">
+                        <input type="date" id="studyDate" class="input">
+                        <input type="number" id="studyHours" placeholder="Hours" min="0" max="24" step="0.5" class="input">
+                    </div>
+                    <input type="text" id="studySubject" placeholder="Subject (optional)" class="input">
+                    <button class="btn btn-primary btn-full" id="logHoursBtn">Log Study Hours</button>
+                </div>
+
+                <!-- Study Log -->
+                <div class="study-log" id="studyLog">
+                    <h3>Recent Activity</h3>
+                    <div class="log-list" id="logList">
+                        <div class="empty-state" id="emptyStudy">
+                            <span class="empty-icon">📖</span>
+                            <p>No study hours logged yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Chart -->
+                <div class="chart-section">
+                    <h3>Weekly Progress</h3>
+                    <div class="chart-container">
+                        <div class="chart" id="weeklyChart"></div>
+                        <div class="chart-labels" id="chartLabels"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Edit Goal Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Goal</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <input type="hidden" id="editGoalId">
+            <input type="text" id="editGoalTitle" placeholder="Goal title..." class="input" required>
+            <textarea id="editGoalDescription" placeholder="Description (optional)" class="input textarea"></textarea>
+            <div class="form-row">
+                <select id="editGoalPriority" class="input select">
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <input type="date" id="editGoalDeadline" class="input">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                <button class="btn btn-primary" id="updateGoalBtn">Update Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
