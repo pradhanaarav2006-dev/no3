@@ -4,7 +4,10 @@ const Storage = {
     saveGoals: (goals) => localStorage.setItem('studytrack_goals', JSON.stringify(goals)),
 
     getStudyLogs: () => JSON.parse(localStorage.getItem('studytrack_logs')) || [],
-    saveStudyLogs: (logs) => localStorage.setItem('studytrack_logs', JSON.stringify(logs))
+    saveStudyLogs: (logs) => localStorage.setItem('studytrack_logs', JSON.stringify(logs)),
+
+    getTheme: () => localStorage.getItem('studytrack_theme') || 'dark',
+    saveTheme: (theme) => localStorage.setItem('studytrack_theme', theme)
 };
 
 // ===== DOM Elements =====
@@ -51,7 +54,11 @@ const DOM = {
     updateGoalBtn: document.getElementById('updateGoalBtn'),
 
     // Toast
-    toast: document.getElementById('toast')
+    toast: document.getElementById('toast'),
+
+    // Theme
+    themeToggle: document.getElementById('themeToggle'),
+    themeIcon: document.getElementById('themeIcon')
 };
 
 // ===== Utility Functions =====
@@ -85,6 +92,26 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         DOM.toast.classList.remove('show');
     }, 3000);
+}
+
+// ===== Theme Functions =====
+function initTheme() {
+    const savedTheme = Storage.getTheme();
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    Storage.saveTheme(newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    DOM.themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
 }
 
 // ===== Goals Functions =====
@@ -389,10 +416,14 @@ function initEventListeners() {
 
     // Set default date to today
     DOM.studyDate.value = getToday();
+
+    // Theme toggle
+    DOM.themeToggle.addEventListener('click', toggleTheme);
 }
 
 // ===== Initialize =====
 function init() {
+    initTheme();
     initEventListeners();
     renderGoals();
     renderStudyLogs();

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +11,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="logo">
-            <span class="logo-icon">📚</span>
-            <h1>StudyTrack</h1>
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">📚</span>
+                <h1>StudyTrack</h1>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                <span class="theme-icon" id="themeIcon">🌙</span>
+            </button>
         </div>
         <p class="tagline">Track Your Progress, Achieve Your Goals</p>
     </header>
@@ -67,7 +74,8 @@
                 <!-- Add Goal Form (Hidden by default) -->
                 <div class="goal-form" id="goalForm" style="display: none;">
                     <input type="text" id="goalTitle" placeholder="Goal title..." class="input" required>
-                    <textarea id="goalDescription" placeholder="Description (optional)" class="input textarea"></textarea>
+                    <textarea id="goalDescription" placeholder="Description (optional)"
+                        class="input textarea"></textarea>
                     <div class="form-row">
                         <select id="goalPriority" class="input select">
                             <option value="low">Low Priority</option>
@@ -101,7 +109,8 @@
                 <div class="study-form">
                     <div class="form-row">
                         <input type="date" id="studyDate" class="input">
-                        <input type="number" id="studyHours" placeholder="Hours" min="0" max="24" step="0.5" class="input">
+                        <input type="number" id="studyHours" placeholder="Hours" min="0" max="24" step="0.5"
+                            class="input">
                     </div>
                     <input type="text" id="studySubject" placeholder="Subject (optional)" class="input">
                     <button class="btn btn-primary btn-full" id="logHoursBtn">Log Study Hours</button>
@@ -160,4 +169,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
